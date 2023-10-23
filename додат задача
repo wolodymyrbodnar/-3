@@ -1,0 +1,77 @@
+from copy import *  # Модуль для копіювання масиву
+
+field = [[". . . . . . . . . . . ."],
+         [". X . X . . . . . . . ."],
+         [". . X . . . . . . . . ."],
+         [". X . X . . . . . . . ."],
+         [". . . . . . . . . . . ."],
+         [". . . . . . . . . . . ."],
+         [". . . . . . . . . . . ."],
+         [". . . . . . . . . . . ."],
+         [". . . . . . . . . . . ."], ]
+
+
+def transform_field(field):
+    # Трансформуємо поле для виведення та обчислювання індексів
+    if len(field[0]) == 1:
+        for i in range(len(field)):
+            field[i][:] = field[i][0].split()
+    return field
+
+
+def calculate_position(move, field):
+    coords = []  # Список для нових координат
+    backup = deepcopy(field)  # Копіюю масив в змінну
+    right_left, up_down = 0, 0  # Змінні, щоб зберегти нові позиції Х
+
+    if move in ["w", "s"]:  # Якщо рух вниз, вгору:
+        up_down = -1 if move == "w" else 1
+    elif move in ["a", "d"]:  # Якщо рух вліво, вправо:
+        right_left = 1 if move == 'd' else -1
+    elif move == 'q':  # Кнопка виходу
+        quit()
+
+    for row in range(len(field)):  # Проходимо по спискам
+        for index in range(len(field[row])):  # Проходимо по елементам кожного списка
+            if field[row][index] == "X":
+                coords += [(row, index)]  # Поповнюємо список нових координат
+                field[row][index] = '.'  # Замінюємо записаний елемент
+    # Обчисдення нових позицій 
+    coords = [(pos[0] + up_down, pos[1] + right_left) for pos in coords]
+
+    # Заповнюємо поле Х-ами з новими позиціями
+    for pos in coords:
+        # Якщо користувач вийшов за границі повертаємо копію 
+        if 0 <= pos[0] < len(field) and 0 <= pos[1] < len(field[0]):
+            field[pos[0]][pos[1]] = 'X'
+        else:
+            return backup
+    return field
+
+
+def display_field(field):  # Функція для виведення поля
+    for i in field:
+        print("".join(i))
+
+
+def enter_coords():
+    # Якщо дані невалідні, то функція буде запускати саме рекурсивно 
+    try:
+        move = input("Введіть напрямок руху (a - вліво, d - вправо, w - вгору, s - вниз, q - вихід): ")
+        if move not in ["a", 'w', 's', 'd', 'q']:
+            print("Введіть коректні дані!!!")
+            return enter_coords()
+    except ValueError:
+        print("Введіть коректні дані!!!")
+        return enter_coords()
+    return move
+
+
+# Вивід початкової позиції
+display_field(transform_field(field))
+
+while 1:
+    move = enter_coords()
+    # Обчислення нових позицій 
+    field = calculate_position(move, transform_field(field))
+    display_field(field)  # вивід поля на екран
